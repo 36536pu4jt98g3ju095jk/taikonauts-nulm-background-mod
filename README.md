@@ -1,6 +1,6 @@
 # TaikoNauts NULM Background
 
-English | [日本語](README.ja.md)
+English | [日本語](README.ja.md) | [Install guide](https://36536pu4jt98g3ju095jk.github.io/taikonauts-nulm-background-mod/)
 
 A TaikoNauts ModLoader mod that plays NULM (`.nulm`, LMB) animations as the
 upper and lower backgrounds of the play screen. It switches to a fever

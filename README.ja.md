@@ -1,6 +1,6 @@
 # TaikoNauts NULM Background
 
-[English](README.md) | 日本語
+[English](README.md) | 日本語 | [導入ガイド](https://36536pu4jt98g3ju095jk.github.io/taikonauts-nulm-background-mod/)
 
 TaikoNauts ModLoader 用の MOD です。NULM(`.nulm`、LMB)アニメーションを、演奏画面の上背景・下背景として流します。魂ゲージがクリアになると fever 背景に切り替わり、ゲージが下がると元に戻ります。
 
