@@ -1,0 +1,8 @@
+/dist/
+/build/
+*.dll
+*.zip
+*.pdb
+*.png
+/mod/config.json
+/mod/packs/

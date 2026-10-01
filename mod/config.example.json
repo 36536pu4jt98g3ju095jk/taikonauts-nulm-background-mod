@@ -1,0 +1,7 @@
+{
+  "upper": { "pack": "donbg_a_01_1p", "x": 0, "y": 0 },
+  "lower": { "pack": "bg_nomal_a_01", "x": 0, "y": 540 },
+  "fever": { "pack": "bg_fever_a_01", "x": 0, "y": 540 },
+  "dai": { "pack": "bg_dai_a_01", "x": 0, "y": 540 },
+  "clearDetection": "game"
+}
