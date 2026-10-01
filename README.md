@@ -1,5 +1,7 @@
 # TaikoNauts NULM Background
 
+English | [日本語](README.ja.md)
+
 A TaikoNauts ModLoader mod that plays NULM (`.nulm`, LMB) animations as the
 upper and lower backgrounds of the play screen. It switches to a fever
 background when the soul gauge clears and back again when it drops.
