@@ -12,6 +12,17 @@ TaikoNauts ModLoader 用の MOD です。NULM(`.nulm`、LMB)アニメーショ�
 - TaikoNauts 2026.10.01.1 と ModLoader v1.3.1 で動作を確認しています。fever の判定はコードのパターンで見つけるため、ゲームの更新後に見つからなくなる可能性があります。
 - NULM アニメーションのパックは、各自で用意してください。**NULM のデータやテクスチャは同梱していません。** 権利は各権利者に帰属します。
 
+## 先に ModLoader を入れる
+
+すでに [TaikoNauts ModLoader](https://github.com/aightallthing/taikonauts-mod-loader) を入れている場合は、飛ばしてください。
+
+1. TaikoNauts を終了します。
+2. [ModLoader のリリースページ](https://github.com/aightallthing/taikonauts-mod-loader/releases/latest)から Windows 用の ZIP をダウンロードして展開し、中身を TaikoNauts のフォルダ(`TaikoNauts.exe` がある場所)へコピーします。
+3. `install.bat` を実行します。確認済みの `raylib_original.dll`(元のファイルのバックアップ)と `mods` フォルダが作られます。未対応のファイルや、すでに書き換えられた `raylib.dll` は置き換えません。`uninstall.bat` で元に戻せます。
+4. `TaikoNauts.ModManager.exe` で、MOD の一覧、有効/無効の切り替え、追加ができます。MOD の ZIP は「MODを追加」からも入れられます。
+
+DLL の MOD はゲームの中でコードを実行します。信頼できる配布元のものだけを入れてください。
+
 ## インストール
 
 1. TaikoNauts を終了します。

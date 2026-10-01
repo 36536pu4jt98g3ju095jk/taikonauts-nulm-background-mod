@@ -16,6 +16,24 @@ it, so the lane, notes, score and every other element stay on top.
 - NULM animation packs that you provide yourself. **No NULM data or textures are
   included**; they belong to their owners.
 
+## Install the ModLoader first
+
+Skip this if you already have the
+[TaikoNauts ModLoader](https://github.com/aightallthing/taikonauts-mod-loader).
+
+1. Close TaikoNauts.
+2. Download the Windows ZIP from the
+   [ModLoader release page](https://github.com/aightallthing/taikonauts-mod-loader/releases/latest),
+   extract it and copy its contents into the TaikoNauts folder (the one with
+   `TaikoNauts.exe`).
+3. Run `install.bat`. It creates a verified `raylib_original.dll` backup and a
+   `mods` folder. It refuses to replace an unknown or already modified
+   `raylib.dll`. `uninstall.bat` restores the original.
+4. `TaikoNauts.ModManager.exe` lists, enables, disables and adds mods; a mod ZIP
+   can also be added with "Add mod".
+
+A DLL mod runs code inside the game. Only install mods from sources you trust.
+
 ## Install
 
 1. Close TaikoNauts.

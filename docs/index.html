@@ -170,7 +170,7 @@ html[data-lang="ja"] [lang="en"], html[data-lang="en"] [lang="ja"] { display: no
   <h2 lang="en">What you need</h2>
   <div lang="ja">
     <ul class="plain">
-      <li>TaikoNauts ModLoader v1.2.0 以降</li>
+      <li>TaikoNauts ModLoader v1.2.0 以降(<a href="#modloader">入れ方はこちら</a>)</li>
       <li>TaikoNauts 2026.10.01.1 と ModLoader v1.3.1 で動作確認済み</li>
       <li>NULM アニメーションのパック(各自で用意)</li>
     </ul>
@@ -178,7 +178,7 @@ html[data-lang="ja"] [lang="en"], html[data-lang="en"] [lang="ja"] { display: no
   </div>
   <div lang="en">
     <ul class="plain">
-      <li>TaikoNauts ModLoader v1.2.0 or later</li>
+      <li>TaikoNauts ModLoader v1.2.0 or later (<a href="#modloader">how to install it</a>)</li>
       <li>Tested with TaikoNauts 2026.10.01.1 and ModLoader v1.3.1</li>
       <li>NULM animation packs, which you provide yourself</li>
     </ul>
@@ -186,9 +186,44 @@ html[data-lang="ja"] [lang="en"], html[data-lang="en"] [lang="ja"] { display: no
   </div>
 </section>
 
+<section id="modloader">
+  <h2 lang="ja">先に ModLoader を入れる</h2>
+  <h2 lang="en">Install the ModLoader first</h2>
+  <p lang="ja">この MOD は <a href="https://github.com/aightallthing/taikonauts-mod-loader">TaikoNauts ModLoader</a> の上で動きます。すでに入れている場合は、次の「導入手順」へ進んでください。</p>
+  <p lang="en">This mod runs on the <a href="https://github.com/aightallthing/taikonauts-mod-loader">TaikoNauts ModLoader</a>. If you already have it, skip to the next section.</p>
+  <ol class="steps">
+    <li>
+      <p lang="ja"><strong>TaikoNauts を終了</strong>します。</p>
+      <p lang="en"><strong>Close TaikoNauts.</strong></p>
+    </li>
+    <li>
+      <p lang="ja"><a href="https://github.com/aightallthing/taikonauts-mod-loader/releases/latest">ModLoader のリリースページ</a>から Windows 用の ZIP(<code class="inline">TaikoNauts-ModLoader-…-win-x64.zip</code>)をダウンロードして展開し、中身を <strong>TaikoNauts のフォルダ(<code class="inline">TaikoNauts.exe</code> がある場所)</strong>へコピーします。</p>
+      <p lang="en">Download the Windows ZIP (<code class="inline">TaikoNauts-ModLoader-…-win-x64.zip</code>) from the <a href="https://github.com/aightallthing/taikonauts-mod-loader/releases/latest">ModLoader release page</a>, extract it and copy its contents into the <strong>TaikoNauts folder (the one with <code class="inline">TaikoNauts.exe</code>)</strong>.</p>
+      <pre class="code">TaikoNauts\
+  TaikoNauts.exe
+  install.bat                  (from the ModLoader ZIP)
+  uninstall.bat
+  raylib_mod_loader.dll
+  TaikoNauts.ModManager.exe</pre>
+    </li>
+    <li>
+      <p lang="ja"><code class="inline">install.bat</code> を実行します。<code class="inline">raylib_original.dll</code>(元のファイルのバックアップ)ができ、<code class="inline">mods</code> フォルダが作られれば成功です。</p>
+      <p lang="en">Run <code class="inline">install.bat</code>. It succeeded when <code class="inline">raylib_original.dll</code> (a backup of the original file) appears and a <code class="inline">mods</code> folder is created.</p>
+      <p class="muted" lang="ja">インストーラーは、未対応のファイルや、すでに書き換えられた <code class="inline">raylib.dll</code> は置き換えません。元に戻したいときは <code class="inline">uninstall.bat</code> を実行します。</p>
+      <p class="muted" lang="en">The installer refuses to replace an unknown or already modified <code class="inline">raylib.dll</code>. Run <code class="inline">uninstall.bat</code> to go back.</p>
+    </li>
+    <li>
+      <p lang="ja"><code class="inline">TaikoNauts.ModManager.exe</code> を開くと、導入した MOD の一覧・有効/無効の切り替え・追加ができます。MOD の ZIP は、このマネージャーの「MODを追加」からも入れられます。</p>
+      <p lang="en">Open <code class="inline">TaikoNauts.ModManager.exe</code> to list mods, enable or disable them and add new ones. You can also add a mod ZIP with “Add mod” in this manager.</p>
+    </li>
+  </ol>
+  <div class="note" lang="ja">DLL の MOD はゲームの中でコードを実行します。信頼できる配布元のものだけを入れてください。</div>
+  <div class="note" lang="en">A DLL mod runs code inside the game. Only install mods from sources you trust.</div>
+</section>
+
 <section id="install">
-  <h2 lang="ja">導入手順</h2>
-  <h2 lang="en">Install</h2>
+  <h2 lang="ja">この MOD の導入手順</h2>
+  <h2 lang="en">Install this mod</h2>
   <ol class="steps">
     <li>
       <p lang="ja"><strong>TaikoNauts を終了</strong>します。ゲームの起動中は MOD を入れ替えないでください。</p>
