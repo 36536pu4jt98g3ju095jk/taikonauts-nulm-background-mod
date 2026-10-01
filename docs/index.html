@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="ja" data-lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NULM Background for TaikoNauts</title>
+<meta name="description" content="TaikoNauts の演奏画面の背景に NULM アニメーションを流す MOD の導入方法 / How to install the NULM Background mod for TaikoNauts">
+<style>
+:root {
+  --bg: #fbf7f2;
+  --surface: #ffffff;
+  --text: #241c1a;
+  --muted: #6b5f5a;
+  --line: #e7ddd5;
+  --accent: #d6402b;
+  --accent-ink: #ffffff;
+  --code-bg: #2a211f;
+  --code-text: #f6ece6;
+  --upper: #f2b84b;
+  --lower: #e96a4d;
+  --fever: #6fb7d9;
+  --dai: #8aa66b;
+  --ui: #cfc4bd;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161110;
+    --surface: #211a18;
+    --text: #f4ebe6;
+    --muted: #b3a59e;
+    --line: #3a2f2c;
+    --accent: #f06a52;
+    --accent-ink: #1a0f0d;
+    --code-bg: #0f0b0a;
+    --code-text: #f6ece6;
+    --upper: #c89330;
+    --lower: #c9533b;
+    --fever: #4f93b3;
+    --dai: #6c8650;
+    --ui: #4a3f3b;
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Yu Gothic UI", Meiryo, sans-serif;
+  line-height: 1.75;
+  -webkit-text-size-adjust: 100%;
+}
+.wrap { max-width: 860px; margin: 0 auto; padding: 0 16px; }
+header.site {
+  position: sticky; top: 0; z-index: 5;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+header.site .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; }
+header.site a.brand { color: var(--text); text-decoration: none; font-weight: 700; letter-spacing: .01em; }
+.lang { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.lang button {
+  appearance: none; border: 0; background: transparent; color: var(--muted);
+  font: inherit; font-size: .85rem; padding: 4px 12px; cursor: pointer;
+}
+.lang button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.lang button:focus-visible, a:focus-visible, .copy:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.hero { padding: 56px 0 28px; }
+.hero h1 { font-size: clamp(1.7rem, 5.5vw, 2.5rem); line-height: 1.25; margin: 0 0 12px; }
+.hero p.lead { color: var(--muted); font-size: 1.05rem; margin: 0 0 24px; max-width: 40rem; }
+.btns { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn {
+  display: inline-block; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-weight: 600;
+  border: 1px solid var(--line); color: var(--text); background: var(--surface);
+}
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn:hover { filter: brightness(1.05); }
+
+section { padding: 28px 0; border-top: 1px solid var(--line); }
+section h2 { font-size: 1.35rem; margin: 0 0 14px; }
+section h3 { font-size: 1.05rem; margin: 22px 0 8px; }
+p { margin: 0 0 12px; }
+.muted { color: var(--muted); }
+ul.plain { margin: 0 0 12px; padding-left: 1.2rem; }
+ul.plain li { margin: 4px 0; }
+
+.steps { counter-reset: step; list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.steps > li {
+  counter-increment: step; position: relative;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+  padding: 14px 16px 14px 56px;
+}
+.steps > li::before {
+  content: counter(step); position: absolute; left: 14px; top: 14px;
+  width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: .95rem;
+}
+.steps > li > :last-child { margin-bottom: 0; }
+
+pre.code, .codebox {
+  position: relative; margin: 8px 0 0; background: var(--code-bg); color: var(--code-text);
+  border-radius: 10px; padding: 12px 14px; overflow-x: auto; font-size: .86rem; line-height: 1.6;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Cascadia Mono", monospace;
+  white-space: pre;
+}
+.copy {
+  position: absolute; top: 6px; right: 6px; font: inherit; font-size: .75rem;
+  background: rgba(255,255,255,.12); color: var(--code-text); border: 0; border-radius: 6px; padding: 3px 9px; cursor: pointer;
+}
+.copy:hover { background: rgba(255,255,255,.22); }
+code.inline {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .88em;
+  background: color-mix(in srgb, var(--text) 8%, transparent); padding: 1px 6px; border-radius: 5px;
+}
+
+table { width: 100%; border-collapse: collapse; margin: 8px 0 12px; font-size: .95rem; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { background: color-mix(in srgb, var(--text) 5%, transparent); font-weight: 600; }
+tr:last-child td { border-bottom: 0; }
+.tablewrap { overflow-x: auto; }
+
+figure.layout { margin: 14px 0 6px; }
+figure.layout svg { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+figure.layout figcaption { color: var(--muted); font-size: .85rem; margin-top: 6px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 8px; font-size: .88rem; }
+.legend span::before { content: ""; display: inline-block; width: .8em; height: .8em; border-radius: 3px; margin-right: 6px; vertical-align: -1px; background: var(--c); }
+
+.note {
+  border-left: 4px solid var(--accent); background: var(--surface); border-radius: 0 10px 10px 0;
+  padding: 10px 14px; margin: 12px 0;
+}
+footer { padding: 28px 0 56px; color: var(--muted); font-size: .9rem; border-top: 1px solid var(--line); }
+footer a { color: inherit; }
+
+/* language switch */
+html[data-lang="ja"] [lang="en"], html[data-lang="en"] [lang="ja"] { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="brand" href="#top">NULM Background</a>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-set-lang="ja" aria-pressed="true">日本語</button>
+      <button type="button" data-set-lang="en" aria-pressed="false">English</button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+<div class="wrap">
+
+<div class="hero">
+  <h1 lang="ja">演奏画面の背景に<br>NULM アニメーションを流そう</h1>
+  <h1 lang="en">Play NULM animations<br>as your play-screen background</h1>
+  <p class="lead" lang="ja">TaikoNauts ModLoader 用の MOD です。上背景・下背景に NULM を流し、魂ゲージがクリアになると fever 背景へ切り替わります。背景は曲ごとにランダムで選ばれます。</p>
+  <p class="lead" lang="en">A TaikoNauts ModLoader mod that plays NULM animations as the upper and lower backgrounds, switches to a fever background when the soul gauge clears, and picks backgrounds at random for each song.</p>
+  <div class="btns">
+    <a class="btn primary" href="https://github.com/36536pu4jt98g3ju095jk/taikonauts-nulm-background-mod/releases/latest"><span lang="ja">最新版をダウンロード</span><span lang="en">Download the latest release</span></a>
+    <a class="btn" href="https://github.com/36536pu4jt98g3ju095jk/taikonauts-nulm-background-mod"><span lang="ja">GitHub で見る</span><span lang="en">View on GitHub</span></a>
+  </div>
+</div>
+
+<section id="requirements">
+  <h2 lang="ja">必要なもの</h2>
+  <h2 lang="en">What you need</h2>
+  <div lang="ja">
+    <ul class="plain">
+      <li>TaikoNauts ModLoader v1.2.0 以降</li>
+      <li>TaikoNauts 2026.10.01.1 と ModLoader v1.3.1 で動作確認済み</li>
+      <li>NULM アニメーションのパック(各自で用意)</li>
+    </ul>
+    <div class="note"><strong>NULM のデータや画像は同梱していません。</strong>権利は各権利者に帰属します。ご自身で用意できるものだけを使ってください。</div>
+  </div>
+  <div lang="en">
+    <ul class="plain">
+      <li>TaikoNauts ModLoader v1.2.0 or later</li>
+      <li>Tested with TaikoNauts 2026.10.01.1 and ModLoader v1.3.1</li>
+      <li>NULM animation packs, which you provide yourself</li>
+    </ul>
+    <div class="note"><strong>No NULM data or textures are included.</strong> They belong to their owners. Use only what you have the right to use.</div>
+  </div>
+</section>
+
+<section id="install">
+  <h2 lang="ja">導入手順</h2>
+  <h2 lang="en">Install</h2>
+  <ol class="steps">
+    <li>
+      <p lang="ja"><strong>TaikoNauts を終了</strong>します。ゲームの起動中は MOD を入れ替えないでください。</p>
+      <p lang="en"><strong>Close TaikoNauts.</strong> Do not change mods while the game is running.</p>
+    </li>
+    <li>
+      <p lang="ja"><a href="https://github.com/36536pu4jt98g3ju095jk/taikonauts-nulm-background-mod/releases/latest">リリースページ</a>から ZIP をダウンロードし、<code class="inline">TaikoNauts\mods</code> に展開します。<code class="inline">mods\nulm-background</code> ができれば成功です。</p>
+      <p lang="en">Download the ZIP from the <a href="https://github.com/36536pu4jt98g3ju095jk/taikonauts-nulm-background-mod/releases/latest">release page</a> and extract it into <code class="inline">TaikoNauts\mods</code>. You should get <code class="inline">mods\nulm-background</code>.</p>
+      <pre class="code">TaikoNauts\
+  mods\
+    nulm-background\
+      nulm_background.dll
+      modconfig.json
+      config.example.json</pre>
+    </li>
+    <li>
+      <p lang="ja">使っている<strong>スキンの <code class="inline">Lumens</code> フォルダ</strong>を作り、NULM のパックを置きます。パックごとに 1 つのフォルダを作ります。</p>
+      <p lang="en">Create a <strong><code class="inline">Lumens</code> folder inside the skin you use</strong> and put your NULM packs there, one folder per pack.</p>
+      <pre class="code">TaikoNauts\
+  Skins\
+    K-Style\
+      Lumens\
+        bg_nomal_a_01\
+          bg_nomal_a_01.nulm
+          bg_nomal_a_01_0.png      (atlas 0)
+          bg_nomal_a_01_1.png      (atlas 1, if used)
+        donbg_a_01_1p\
+          ...</pre>
+      <p class="muted" lang="ja">フォルダ名、<code class="inline">.nulm</code> のファイル名、画像の接頭辞は同じ名前にします。</p>
+      <p class="muted" lang="en">The folder, the <code class="inline">.nulm</code> file and the image prefix share one name.</p>
+    </li>
+    <li>
+      <p lang="ja"><strong>ゲームを起動</strong>して、曲を演奏します。背景が NULM に変わります。</p>
+      <p lang="en"><strong>Start the game</strong> and play a song. The background becomes your NULM.</p>
+    </li>
+  </ol>
+</section>
+
+<section id="packs">
+  <h2 lang="ja">パックの名前とレイヤー</h2>
+  <h2 lang="en">Pack names and layers</h2>
+  <p lang="ja">パック名の先頭で、どの場所に使うかが決まります。曲が始まるたびに、レイヤーごとにパックが 1 つランダムに選ばれます。同じレイヤーのパックが複数あれば、曲ごとに別の背景になります。</p>
+  <p lang="en">The start of a pack's name decides where it is used. At the start of every song, one pack is picked at random for each layer. With several packs for a layer, each song gets a different background.</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th><span lang="ja">名前の先頭</span><span lang="en">Name starts with</span></th><th><span lang="ja">レイヤー</span><span lang="en">Layer</span></th></tr></thead>
+      <tbody>
+        <tr><td><code class="inline">donbg_</code></td><td><span lang="ja">上背景</span><span lang="en">Upper background</span></td></tr>
+        <tr><td><code class="inline">bg_nomal_</code> / <code class="inline">bg_normal_</code></td><td><span lang="ja">下背景</span><span lang="en">Lower background</span></td></tr>
+        <tr><td><code class="inline">bg_fever_</code></td><td><span lang="ja">fever 背景(ゲージがクリアの間に表示)</span><span lang="en">Fever background (shown while the gauge is cleared)</span></td></tr>
+        <tr><td><code class="inline">bg_dai_</code></td><td><span lang="ja">下背景の上に重ねる台</span><span lang="en">Stand drawn over the lower background</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <figure class="layout">
+    <svg viewBox="0 0 960 540" role="img" aria-labelledby="layout-title">
+      <title id="layout-title">Play screen layers</title>
+      <rect x="0" y="0" width="960" height="138" fill="var(--upper)"/>
+      <text x="480" y="78" text-anchor="middle" font-size="26" font-weight="700" fill="var(--text)">donbg_*</text>
+      <rect x="0" y="144" width="960" height="120" fill="var(--ui)"/>
+      <text x="480" y="212" text-anchor="middle" font-size="22" fill="var(--text)">lane / notes / score</text>
+      <rect x="0" y="270" width="960" height="270" fill="var(--lower)"/>
+      <rect x="0" y="270" width="480" height="270" fill="var(--fever)" opacity=".55"/>
+      <rect x="0" y="500" width="960" height="40" fill="var(--dai)"/>
+      <text x="240" y="412" text-anchor="middle" font-size="24" font-weight="700" fill="var(--text)">bg_fever_*</text>
+      <text x="720" y="412" text-anchor="middle" font-size="24" font-weight="700" fill="var(--text)">bg_nomal_*</text>
+      <text x="480" y="527" text-anchor="middle" font-size="20" font-weight="700" fill="var(--text)">bg_dai_*</text>
+    </svg>
+    <figcaption lang="ja">演奏画面と各レイヤーの位置(模式図)。左半分は、fever のときに下背景が置き換わる様子を表します。</figcaption>
+    <figcaption lang="en">Where each layer sits on the play screen (schematic). The left half shows the lower background being replaced during fever.</figcaption>
+  </figure>
+  <p lang="ja">スキンに無いレイヤーは、ゲーム本来の背景のままです。スキンを切り替えると、そのスキンの <code class="inline">Lumens</code> の中身に切り替わります。</p>
+  <p lang="en">A layer the skin has no pack for keeps the game's own background. Switching skins switches to that skin's <code class="inline">Lumens</code>.</p>
+</section>
+
+<section id="fever">
+  <h2 lang="ja">fever への切り替え</h2>
+  <h2 lang="en">Fever switching</h2>
+  <p lang="ja">魂ゲージがクリアになると、上背景が切り替わり、下に fever 背景が現れます。ゲージがクリアの位置を下回ると、元に戻ります。判定はゲーム自身のクリア判定(<code class="inline">Gauge.IsGaugeClear</code>)を使うので、スキンには依存しません。</p>
+  <p lang="en">When the soul gauge clears, the upper background changes and the fever background appears below. It returns when the gauge drops under the clear border. The decision is the game's own (<code class="inline">Gauge.IsGaugeClear</code>), so it does not depend on the skin.</p>
+  <div class="note" lang="ja">ゲームの更新でコードの形が変わると、この判定を見つけられなくなることがあります。その場合は何も書き換えず、fever 背景だけ使われません(下記のログで分かります)。</div>
+  <div class="note" lang="en">A game update that changes the code can make this decision unavailable. Nothing is patched in that case and only the fever background is not used (the log below tells you).</div>
+</section>
+
+<section id="config">
+  <h2 lang="ja">設定(任意)</h2>
+  <h2 lang="en">Settings (optional)</h2>
+  <p lang="ja"><code class="inline">config.json</code> はなくても動きます。スキンの <code class="inline">Lumens</code> に無いレイヤーに使う固定のパックや、判定方法を指定したいときだけ作ります。<code class="inline">config.example.json</code> を <code class="inline">mods\nulm-background\config.json</code> にコピーして編集します。固定のパックは <code class="inline">mods\nulm-background\packs\&lt;パック名&gt;\</code> に置きます。</p>
+  <p lang="en"><code class="inline">config.json</code> is not required. Create it only to name fixed packs for layers the skin's <code class="inline">Lumens</code> has nothing for, or to change the detection. Copy <code class="inline">config.example.json</code> to <code class="inline">mods\nulm-background\config.json</code> and edit it. Fixed packs live in <code class="inline">mods\nulm-background\packs\&lt;pack&gt;\</code>.</p>
+  <pre class="code">{
+  "upper": { "pack": "donbg_a_01_1p", "x": 0, "y": 0 },
+  "lower": { "pack": "bg_nomal_a_01", "x": 0, "y": 540 },
+  "fever": { "pack": "bg_fever_a_01", "x": 0, "y": 540 },
+  "dai": { "pack": "bg_dai_a_01", "x": 0, "y": 540 },
+  "clearDetection": "game"
+}</pre>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th><span lang="ja">値</span><span lang="en">Value</span></th><th><span lang="ja">意味</span><span lang="en">Meaning</span></th></tr></thead>
+      <tbody>
+        <tr><td><code class="inline">"game"</code></td><td><span lang="ja">ゲーム自身のクリア判定を使う(初期値)</span><span lang="en">Use the game's own clear decision (default)</span></td></tr>
+        <tr><td><code class="inline">"gauge"</code></td><td><span lang="ja">描画されたゲージの長さから推測する。スキンの絵に依存する代替手段</span><span lang="en">Infer it from the drawn gauge length. A fallback that depends on the skin's artwork</span></td></tr>
+        <tr><td><code class="inline">"off"</code></td><td><span lang="ja">fever に切り替えない</span><span lang="en">Never switch to fever</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="troubleshooting">
+  <h2 lang="ja">うまくいかないとき</h2>
+  <h2 lang="en">Troubleshooting</h2>
+  <p lang="ja">ゲームのフォルダにある <code class="inline">modloader.log</code> に、この MOD の動作が記録されます。<code class="inline">NulmBackground</code> の行を探してください。</p>
+  <p lang="en">The mod writes to <code class="inline">modloader.log</code> in the game folder. Look for the <code class="inline">NulmBackground</code> lines.</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th><span lang="ja">ログ</span><span lang="en">Log line</span></th><th><span lang="ja">意味と対処</span><span lang="en">Meaning and fix</span></th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code class="inline">Loaded the lower background "…"</code></td>
+          <td><span lang="ja">パックを読み込めました。曲ごとに出ます。</span><span lang="en">A pack was loaded. You see this for every song.</span></td>
+        </tr>
+        <tr>
+          <td><code class="inline">Hooked Gauge.IsGaugeClear</code></td>
+          <td><span lang="ja">fever の判定が使えます。</span><span lang="en">The fever decision is available.</span></td>
+        </tr>
+        <tr>
+          <td><code class="inline">Gauge.IsGaugeClear was not found exactly once…</code></td>
+          <td><span lang="ja">ゲームの更新で判定のコードが変わっています。fever 背景は使われません。MOD の新しい版を待つか、<code class="inline">clearDetection</code> を <code class="inline">"gauge"</code> にしてください。</span><span lang="en">A game update changed the code. The fever background is not used. Wait for a newer release or set <code class="inline">clearDetection</code> to <code class="inline">"gauge"</code>.</span></td>
+        </tr>
+        <tr>
+          <td><code class="inline">Could not read …\*.nulm</code></td>
+          <td><span lang="ja">パスが違います。フォルダ名、<code class="inline">.nulm</code> のファイル名、置き場所(スキンの <code class="inline">Lumens</code>)を確認してください。</span><span lang="en">The path is wrong. Check the folder name, the <code class="inline">.nulm</code> file name and the location (the skin's <code class="inline">Lumens</code>).</span></td>
+        </tr>
+        <tr>
+          <td><code class="inline">Texture lifecycle extension unavailable…</code></td>
+          <td><span lang="ja">ModLoader が古いです。v1.2.0 以降に更新してください。</span><span lang="en">The ModLoader is too old. Update to v1.2.0 or later.</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <h3 lang="ja">背景が変わらない</h3>
+  <h3 lang="en">The background does not change</h3>
+  <ul class="plain" lang="ja">
+    <li><code class="inline">Lumens</code> を、いま選んでいるスキンの中に作りましたか。</li>
+    <li>パック名の先頭は <code class="inline">donbg_</code>、<code class="inline">bg_nomal_</code>、<code class="inline">bg_fever_</code>、<code class="inline">bg_dai_</code> のどれかですか。</li>
+    <li>ゲームを一度終了して、起動し直しましたか。</li>
+  </ul>
+  <ul class="plain" lang="en">
+    <li>Did you create <code class="inline">Lumens</code> inside the skin you have selected?</li>
+    <li>Does the pack name start with <code class="inline">donbg_</code>, <code class="inline">bg_nomal_</code>, <code class="inline">bg_fever_</code> or <code class="inline">bg_dai_</code>?</li>
+    <li>Did you restart the game?</li>
+  </ul>
+</section>
+
+<section id="limits">
+  <h2 lang="ja">できないこと</h2>
+  <h2 lang="en">Limitations</h2>
+  <ul class="plain" lang="ja">
+    <li>NULM の中のクリップマスクとテキストフィールドは再現しません。</li>
+    <li>1P のレイアウトだけに対応しています。</li>
+    <li>背景を別のサイズで描くスキンは検出できません。</li>
+  </ul>
+  <ul class="plain" lang="en">
+    <li>Clip masks and text fields inside a NULM are not reproduced.</li>
+    <li>Only the 1P layout is handled.</li>
+    <li>Skins that draw their backgrounds in another size are not detected.</li>
+  </ul>
+</section>
+
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p lang="ja">MIT ライセンス。詳しくは <a href="https://github.com/36536pu4jt98g3ju095jk/taikonauts-nulm-background-mod/blob/main/README.ja.md">README(日本語)</a> を参照してください。非公式の MOD です。</p>
+    <p lang="en">MIT licensed. See the <a href="https://github.com/36536pu4jt98g3ju095jk/taikonauts-nulm-background-mod/blob/main/README.md">README</a> for details. This is an unofficial mod.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var buttons = document.querySelectorAll('[data-set-lang]');
+  function setLang(lang) {
+    root.setAttribute('data-lang', lang);
+    root.setAttribute('lang', lang);
+    buttons.forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-set-lang') === lang)); });
+    try { localStorage.setItem('nulm-lang', lang); } catch (e) {}
+  }
+  var saved = null;
+  try { saved = localStorage.getItem('nulm-lang'); } catch (e) {}
+  var initial = saved || ((navigator.language || 'ja').toLowerCase().indexOf('ja') === 0 ? 'ja' : 'en');
+  setLang(initial === 'en' ? 'en' : 'ja');
+  buttons.forEach(function (b) { b.addEventListener('click', function () { setLang(b.getAttribute('data-set-lang')); }); });
+
+  document.querySelectorAll('pre.code').forEach(function (pre) {
+    var button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'copy';
+    button.textContent = 'Copy';
+    button.addEventListener('click', function () {
+      var text = pre.firstChild.textContent;
+      var done = function () { button.textContent = 'Copied'; setTimeout(function () { button.textContent = 'Copy'; }, 1500); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () {});
+    });
+    pre.appendChild(button);
+  });
+})();
+</script>
+</body>
+</html>
