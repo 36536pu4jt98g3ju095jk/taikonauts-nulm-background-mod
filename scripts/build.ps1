@@ -11,7 +11,7 @@ $stage = Join-Path $dist ('.stage-' + [guid]::NewGuid().ToString('N'))
 $modFolder = Join-Path $stage 'nulm-background'
 $dll = Join-Path $modFolder 'nulm_background.dll'
 $manifestSource = Join-Path $root 'mod\modconfig.json'
-$zip = Join-Path $dist 'TaikoNauts-NULM-Background-v1.0.0.zip'
+$zip = Join-Path $dist 'TaikoNauts-NULM-Background-v1.0.1.zip'
 $gcc = (Get-Command gcc.exe -ErrorAction Stop).Source
 $objdump = (Get-Command objdump.exe -ErrorAction Stop).Source
 
@@ -20,10 +20,10 @@ New-Item -ItemType Directory -Path $dist,$build,$modFolder -Force | Out-Null
 try {
     $manifest = [IO.File]::ReadAllText($manifestSource) | ConvertFrom-Json
     if ([string]$manifest.id -ne 'nulm-background' -or
-        [string]$manifest.version -ne '1.0.0' -or
+        [string]$manifest.version -ne '1.0.1' -or
         [string]$manifest.dll -ne 'nulm_background.dll' -or
         $manifest.enabled -isnot [bool]) {
-        throw 'modconfig.json does not match the NULM Background v1.0.0 package.'
+        throw 'modconfig.json does not match the NULM Background v1.0.1 package.'
     }
 
     & $gcc -shared -O2 -s -Wall -Wextra -Werror `

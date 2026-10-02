@@ -156,6 +156,23 @@ int main(int argc, char **argv)
             }
         }        draw_callback(&lower);
         TNColor red = {255, 0, 0, 255};
+        if (getenv("SMOKE_SKIN_UPPER") != NULL) {
+            /* the skin's own upper background: pieces drawn after the lower background */
+            DrawRectangle(100, 50, 300, 150, red);
+        }
+        {
+            /* the lane panel, the first wide draw below the upper band */
+            TNDrawTextureProEvent lane;
+            memset(&lane, 0, sizeof(lane));
+            lane.texture.id = 9997;
+            lane.texture.width = 1426;
+            lane.texture.height = 264;
+            lane.destination.x = 497.0f;
+            lane.destination.y = 276.0f;
+            lane.destination.width = 1426.0f;
+            lane.destination.height = 264.0f;
+            draw_callback(&lane);
+        }
         DrawRectangle(10, 10, 60, 60, red);
         EndTextureMode();
         EndDrawing();

@@ -3,7 +3,7 @@
   "id": "nulm-background",
   "name": "NULM Background",
   "description": "Plays NULM animations as the upper, lower, fever and stand backgrounds of the play screen.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "dll": "nulm_background.dll",
   "enabled": true,
   "author": "aightallthing",

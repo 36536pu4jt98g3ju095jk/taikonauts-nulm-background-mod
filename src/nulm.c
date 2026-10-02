@@ -169,6 +169,18 @@ static int parse_shape(NulmFile *file, const Reader *r, size_t body, size_t *nex
         for (int v = 0; v < vertex_count * 4; ++v)
             graphic->vertices[v] = rd_f32(r, p + (size_t)v * 4);
         p += (size_t)vertex_count * 16;
+        graphic->u_min = graphic->v_min = 1.0e9f;
+        graphic->u_max = graphic->v_max = -1.0e9f;
+        for (int v = 0; v < vertex_count; ++v) {
+            float u = graphic->vertices[v * 4 + 2];
+            float w = graphic->vertices[v * 4 + 3];
+            if (u < graphic->u_min) graphic->u_min = u;
+            if (u > graphic->u_max) graphic->u_max = u;
+            if (w < graphic->v_min) graphic->v_min = w;
+            if (w > graphic->v_max) graphic->v_max = w;
+        }
+        graphic->uv_in_range = vertex_count > 0 && graphic->u_min >= -0.001f && graphic->u_max <= 1.001f &&
+                               graphic->v_min >= -0.001f && graphic->v_max <= 1.001f;
         for (int i = 0; i < index_count; ++i)
             graphic->indices[i] = (unsigned short)rd_u16(r, p + (size_t)i * 2);
         p += (size_t)index_count * 2;

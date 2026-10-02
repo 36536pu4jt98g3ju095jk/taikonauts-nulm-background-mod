@@ -119,7 +119,7 @@ MinGW-w64 の GCC と PowerShell が必要です。
 .\scripts\build.ps1
 ```
 
-`mods\nulm-background`(設定とパック)を持つゲームフォルダがあれば、`-OriginalRaylib <raylib_original.dll のパス>` を付けると、本物の raylib を通して 1 フレームを画面外に描き、`build\render_smoke.png` に書き出します。スクリプトは `dist\TaikoNauts-NULM-Background-v1.0.0.zip` を出力します。
+`mods\nulm-background`(設定とパック)を持つゲームフォルダがあれば、`-OriginalRaylib <raylib_original.dll のパス>` を付けると、本物の raylib を通して 1 フレームを画面外に描き、`build\render_smoke.png` に書き出します。スクリプトは `dist\TaikoNauts-NULM-Background-v1.0.1.zip` を出力します。
 
 ## ライセンス
 

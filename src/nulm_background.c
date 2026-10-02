@@ -13,6 +13,7 @@
 /* raylib / rlgl constants (stable across raylib 4.x and 5.x). */
 #define RL_QUADS 0x0007
 #define RL_BLEND_ALPHA 0
+#define RL_BLEND_ALPHA_PREMULTIPLY 5
 #define RL_BLEND_CUSTOM_SEPARATE 7
 #define GL_ONE 1
 #define GL_SRC_ALPHA 0x0302
@@ -21,6 +22,8 @@
 #define GL_DST_COLOR 0x0306
 #define GL_FUNC_ADD 0x8006
 #define GL_FUNC_REVERSE_SUBTRACT 0x800B
+#define RL_SHADER_UNIFORM_FLOAT 0
+#define RL_SHADER_UNIFORM_VEC2 1
 #define RL_SHADER_UNIFORM_VEC4 3
 #define RL_TEXTURE_FILTER_BILINEAR 1
 
@@ -43,6 +46,8 @@ typedef struct RlImage {
 } RlImage;
 
 typedef TNTexture2D (*LoadTextureFn)(const char *);
+typedef RlImage (*LoadImageFn)(const char *);
+typedef void (*ImageAlphaPremultiplyFn)(RlImage *);
 typedef TNTexture2D (*LoadTextureFromImageFn)(RlImage);
 typedef RlImage (*GenImageColorFn)(int, int, TNColor);
 typedef void (*UnloadImageFn)(RlImage);
@@ -66,6 +71,8 @@ typedef void (*RlVoidFn)(void);
 
 static struct {
     LoadTextureFn load_texture;
+    LoadImageFn load_image;
+    ImageAlphaPremultiplyFn image_alpha_premultiply;
     LoadTextureFromImageFn load_texture_from_image;
     GenImageColorFn gen_image_color;
     UnloadImageFn unload_image;
@@ -116,6 +123,9 @@ static Layer fever = {"fever", 0, NULL, NULL, {{0}}, {0}, 0.0f, 0.0f, "", 0, 0, 
 static Layer dai = {"dai", 0, NULL, NULL, {{0}}, {0}, 0.0f, 0.0f, "", 0, 0, "", 0.0f, 0.0f, -1};
 static RlShader color_shader;
 static int add_color_location = -1;
+static int uv_bounds_location = -1;
+static int texel_size_location = -1;
+static int clamp_uv_location = -1;
 static TNTexture2D white_texture;
 static int gl_ready;
 
@@ -134,7 +144,11 @@ static const char *const vertex_shader =
     "    gl_Position = mvp*vec4(vertexPosition, 1.0);\n"
     "}\n";
 
-/* texel * Mul + Add, the SWF colour transform, in a single pass. */
+/* texel * Mul + Add, the SWF colour transform, in a single pass. The atlases are
+   premultiplied when they are loaded, so interpolation near transparent texels
+   no longer darkens the edges. Each graphic samples only inside its own
+   texture rectangle (half a texel in), so neighbouring tiles cannot show a seam
+   made of the texels around them. */
 static const char *const fragment_shader =
     "#version 330\n"
     "in vec2 fragTexCoord;\n"
@@ -142,14 +156,19 @@ static const char *const fragment_shader =
     "out vec4 finalColor;\n"
     "uniform sampler2D texture0;\n"
     "uniform vec4 addColor;\n"
+    "uniform vec4 uvBounds;\n"
+    "uniform vec2 texelSize;\n"
+    "uniform float clampUv;\n"
     "void main()\n"
     "{\n"
-    "    vec4 base = texture(texture0, fragTexCoord) * fragColor;\n"
+    "    vec2 uv = fragTexCoord;\n"
+    "    if (clampUv > 0.5) uv = clamp(uv, uvBounds.xy + 0.5*texelSize, uvBounds.zw - 0.5*texelSize);\n"
+    "    vec4 base = texture(texture0, uv) * fragColor;\n"
+    "    base.rgb *= fragColor.a;\n"
     "    float a = clamp(base.a + addColor.a, 0.0, 1.0);\n"
-    "    vec3 rgb = base.rgb + addColor.rgb;\n"
+    "    vec3 rgb = base.rgb + addColor.rgb * a;\n"
     "    finalColor = vec4(clamp(rgb, 0.0, 1.0), a);\n"
     "}\n";
-
 #define LOAD_PROC(field, name)                                  \
     do {                                                        \
         FARPROC proc_ = mod_api->getOriginalProc(name);         \
@@ -163,6 +182,8 @@ static const char *const fragment_shader =
 static int load_raylib(void)
 {
     LOAD_PROC(load_texture, "LoadTexture");
+    LOAD_PROC(load_image, "LoadImage");
+    LOAD_PROC(image_alpha_premultiply, "ImageAlphaPremultiply");
     LOAD_PROC(load_texture_from_image, "LoadTextureFromImage");
     LOAD_PROC(gen_image_color, "GenImageColor");
     LOAD_PROC(unload_image, "UnloadImage");
@@ -267,6 +288,9 @@ static int ensure_gl(void)
         return 0;
     }
     add_color_location = gl.get_shader_location(color_shader, "addColor");
+    uv_bounds_location = gl.get_shader_location(color_shader, "uvBounds");
+    texel_size_location = gl.get_shader_location(color_shader, "texelSize");
+    clamp_uv_location = gl.get_shader_location(color_shader, "clampUv");
     TNColor white = {255, 255, 255, 255};
     RlImage image = gl.gen_image_color(1, 1, white);
     white_texture = gl.load_texture_from_image(image);
@@ -282,35 +306,33 @@ static unsigned char clamp_byte(float v)
     return (unsigned char)v;
 }
 
-static int apply_blend(int blend_mode)
+/* Everything is drawn with premultiplied alpha. */
+static void apply_blend(int blend_mode)
 {
     switch (blend_mode) {
     case SWF_BLEND_MULTIPLY:
         gl.rl_set_blend_factors(GL_DST_COLOR, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE,
                                 GL_FUNC_ADD, GL_FUNC_ADD);
         gl.rl_set_blend_mode(RL_BLEND_CUSTOM_SEPARATE);
-        return 1;
+        break;
     case SWF_BLEND_SCREEN:
         gl.rl_set_blend_factors(GL_ONE, GL_ONE_MINUS_SRC_COLOR, GL_ONE, GL_ONE,
                                 GL_FUNC_ADD, GL_FUNC_ADD);
         gl.rl_set_blend_mode(RL_BLEND_CUSTOM_SEPARATE);
-        return 1;
+        break;
     case SWF_BLEND_ADD:
-        gl.rl_set_blend_factors(GL_SRC_ALPHA, GL_ONE, GL_ONE, GL_ONE,
-                                GL_FUNC_ADD, GL_FUNC_ADD);
+        gl.rl_set_blend_factors(GL_ONE, GL_ONE, GL_ONE, GL_ONE, GL_FUNC_ADD, GL_FUNC_ADD);
         gl.rl_set_blend_mode(RL_BLEND_CUSTOM_SEPARATE);
-        return 1;
+        break;
     case SWF_BLEND_SUBTRACT:
-        gl.rl_set_blend_factors(GL_SRC_ALPHA, GL_ONE, GL_ONE, GL_ONE,
-                                GL_FUNC_REVERSE_SUBTRACT, GL_FUNC_ADD);
+        gl.rl_set_blend_factors(GL_ONE, GL_ONE, GL_ONE, GL_ONE, GL_FUNC_REVERSE_SUBTRACT, GL_FUNC_ADD);
         gl.rl_set_blend_mode(RL_BLEND_CUSTOM_SEPARATE);
-        return 1;
+        break;
     default:
-        gl.rl_set_blend_mode(RL_BLEND_ALPHA);
-        return 0;
+        gl.rl_set_blend_mode(RL_BLEND_ALPHA_PREMULTIPLY);
+        break;
     }
 }
-
 static void draw_graphic(void *user, const NulmFile *file, const NulmGraphic *graphic,
                          const NulmMat *world, const NulmColor *color, int blend_mode)
 {
@@ -338,10 +360,20 @@ static void draw_graphic(void *user, const NulmFile *file, const NulmGraphic *gr
     if (r == 0 && g == 0 && b == 0 && a == 0 && color->add_r <= 0.0f &&
         color->add_g <= 0.0f && color->add_b <= 0.0f && color->add_a <= 0.0f) return;
 
-    int custom_blend = apply_blend(blend_mode);
+    apply_blend(blend_mode);
     float add[4] = {color->add_r, color->add_g, color->add_b, color->add_a};
+    float bounds[4] = {graphic->u_min, graphic->v_min, graphic->u_max, graphic->v_max};
+    float texel[2] = {texture.width > 0 ? 1.0f / (float)texture.width : 0.0f,
+                      texture.height > 0 ? 1.0f / (float)texture.height : 0.0f};
+    float clamp_uv = (graphic->fill_type == 0x41 && graphic->uv_in_range &&
+                      texture.id != white_texture.id &&
+                      graphic->u_max - graphic->u_min > 2.0f * texel[0] &&
+                      graphic->v_max - graphic->v_min > 2.0f * texel[1]) ? 1.0f : 0.0f;
     gl.begin_shader(color_shader);
     gl.set_shader_value(color_shader, add_color_location, add, RL_SHADER_UNIFORM_VEC4);
+    gl.set_shader_value(color_shader, uv_bounds_location, bounds, RL_SHADER_UNIFORM_VEC4);
+    gl.set_shader_value(color_shader, texel_size_location, texel, RL_SHADER_UNIFORM_VEC2);
+    gl.set_shader_value(color_shader, clamp_uv_location, &clamp_uv, RL_SHADER_UNIFORM_FLOAT);
     gl.rl_set_texture(texture.id);
     gl.rl_begin(RL_QUADS);
     gl.rl_color4ub(r, g, b, a);
@@ -357,7 +389,6 @@ static void draw_graphic(void *user, const NulmFile *file, const NulmGraphic *gr
     gl.rl_end();
     gl.rl_set_texture(0);
     gl.end_shader();
-    if (custom_blend) gl.rl_set_blend_mode(RL_BLEND_ALPHA);
 }
 
 static void draw_layer(Layer *layer)
@@ -369,6 +400,7 @@ static void draw_layer(Layer *layer)
     gl.rl_disable_culling();
     nulm_clip_draw(layer->clip, layer->x, layer->y, 1.0f, &callbacks);
     gl.rl_draw_batch();
+    gl.rl_set_blend_mode(RL_BLEND_ALPHA); /* the game's own blending */
     gl.rl_enable_culling();
 }
 
@@ -439,7 +471,11 @@ static int load_pack(Layer *layer, const char *directory, const char *pack, floa
         char png[MAX_PATH * 2];
         snprintf(png, sizeof(png), "%s\\%s\\%s_%d.png", directory, pack, pack, i);
         if (GetFileAttributesA(png) == INVALID_FILE_ATTRIBUTES) continue;
-        TNTexture2D texture = gl.load_texture(png);
+        RlImage image = gl.load_image(png);
+        if (image.data == NULL) continue;
+        gl.image_alpha_premultiply(&image);
+        TNTexture2D texture = gl.load_texture_from_image(image);
+        gl.unload_image(image);
         if (texture.id == 0) continue;
         gl.set_texture_filter(texture, RL_TEXTURE_FILTER_BILINEAR);
         layer->atlases[i] = texture;
@@ -489,6 +525,11 @@ static void read_layer_config(Layer *layer, const char *object, float default_y)
 static const char *const fever_scroll_clips[3] = {"fever_mc", "scroll_left_mc", "scroll_left2_mc"};
 
 static int upper_drawn_this_frame;
+/* The upper NULM is drawn just before the lane, above whatever the skin draws
+   as its own upper background. */
+static int upper_pending;
+static int draws_since_upper_pending;
+#define UPPER_FALLBACK_DRAWS 120
 static int lower_drawn_this_frame;
 static int scene_absent_frames = 1000000;
 static int clear_state;
@@ -707,6 +748,7 @@ static void __cdecl on_begin_frame(void)
     }
     lower_drawn_this_frame = 0;
     upper_drawn_this_frame = 0;
+    upper_pending = 0;
 
     if (clear_mode == CLEAR_FROM_GAME) {
         /* the game evaluates IsGaugeClear itself; keep its latest answer */
@@ -736,24 +778,40 @@ static void __cdecl on_begin_frame(void)
     if (dai.clip != NULL) nulm_clip_update(dai.clip, dt, 1);
 }
 
-/* The game renders the scene into an offscreen target and draws each
-   skin background as one 1920-wide texture: about 540 tall for the lower
-   background, about 276 tall for the upper one. The matching draw is replaced
-   at the same point in the frame, so every later draw stays on top. */
+/* Draws the pending upper NULM once the skin has finished its own upper
+   background. The lane is the first wide draw whose top is below the upper
+   band; a draw count is the fallback for skins that build it differently. */
+static void flush_pending_upper(float top, float width)
+{
+    if (!upper_pending) return;
+    ++draws_since_upper_pending;
+    if ((top >= 270.0f && width >= 1000.0f) || draws_since_upper_pending > UPPER_FALLBACK_DRAWS) {
+        upper_pending = 0;
+        if (!upper_drawn_this_frame) draw_layer(&upper);
+        upper_drawn_this_frame = 1;
+    }
+}
+
+/* The game renders the scene into an offscreen target. It draws the lower skin
+   background as one 1920-wide texture, about 540 tall. That draw is replaced by
+   the NULM layers at the same point of the frame. The upper background is the
+   skin's own set of draws (one 1920-wide texture, about 276 tall, or many
+   tiles); the upper NULM goes above them, below the lane. */
 static void __cdecl on_draw_texture_pro(TNDrawTextureProEvent *event)
 {
     const TNTexture2D *texture = &event->texture;
-    if ((int)event->source.width == gauge_tile_width &&
-        (int)event->source.height == gauge_tile_height &&
-        (int)event->destination.height == gauge_tile_height)
-        ++gauge_tiles_this_frame;
-    if (texture->width < 1900 || texture->width > 1940) return;
     float top = event->destination.y - event->origin.y;
+    flush_pending_upper(top, event->destination.width < 0 ? -event->destination.width : event->destination.width);
+
+    if (event->source.width == (float)gauge_tile_width &&
+        event->source.height == (float)gauge_tile_height &&
+        (int)event->destination.height == gauge_tile_height) ++gauge_tiles_this_frame;
+    if (texture->width < 1900 || texture->width > 1940) return;
 
     if (lower.enabled && texture->height >= 500 && texture->height <= 560 && top >= 270.0f) {
         if (upper.enabled && !upper_drawn_this_frame) {
-            draw_layer(&upper);
-            upper_drawn_this_frame = 1;
+            upper_pending = 1;
+            draws_since_upper_pending = 0;
         }
         draw_layer(&lower);
         draw_layer(&fever);
@@ -762,12 +820,17 @@ static void __cdecl on_draw_texture_pro(TNDrawTextureProEvent *event)
         event->skipOriginal = 1;
     } else if (upper.enabled && texture->height >= 250 && texture->height <= 300 &&
                top < 100.0f) {
+        upper_pending = 0;
         if (!upper_drawn_this_frame) draw_layer(&upper);
         upper_drawn_this_frame = 1;
         event->skipOriginal = 1;
     }
 }
 
+static void __cdecl on_draw_texture_rec(TNDrawTextureRecEvent *event)
+{
+    flush_pending_upper(event->position.y, event->source.width < 0 ? -event->source.width : event->source.width);
+}
 TNMOD_EXPORT int __cdecl TaikoNautsModInit(const TNModApi *api)
 {
     if (api == NULL || api->version != TNMOD_API_VERSION || api->size < sizeof(TNModApi) ||
@@ -829,6 +892,7 @@ TNMOD_EXPORT int __cdecl TaikoNautsModInit(const TNModApi *api)
 
     if (!api->registerBeginFrame(on_begin_frame) ||
         !api->registerDrawTexturePro(on_draw_texture_pro)) return 0;
+    if (api->registerDrawTextureRec != NULL) api->registerDrawTextureRec(on_draw_texture_rec);
     api->log(MOD_NAME, "Initialized");
     return 1;
 }

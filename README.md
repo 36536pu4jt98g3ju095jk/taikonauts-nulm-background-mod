@@ -113,7 +113,9 @@ TaikoNauts draws the play scene into a 1920x1080 render texture and draws each
 skin background as one 1920-pixel-wide texture: about 540 pixels tall for the
 lower background and about 276 pixels tall for the upper one. The mod watches
 `DrawTexturePro`, skips those draws and plays the NULM at the same point of the
-frame. Playback restarts at the beginning of every song.
+frame. The upper NULM is drawn above the skin's own upper background (its tiles
+and decorations, whether an AUP2 folder or a single texture) and just below the
+lane, so it is not covered. Playback restarts at the beginning of every song.
 
 ## Fever detection
 
@@ -161,7 +163,7 @@ Requires MinGW-w64 GCC and PowerShell.
 With a game folder that already contains `mods\nulm-background` (config and
 packs), `-OriginalRaylib <path to raylib_original.dll>` also renders a frame
 offscreen through the real raylib and writes `build\render_smoke.png`. The
-script writes `dist\TaikoNauts-NULM-Background-v1.0.0.zip`.
+script writes `dist\TaikoNauts-NULM-Background-v1.0.1.zip`.
 
 ## License
 

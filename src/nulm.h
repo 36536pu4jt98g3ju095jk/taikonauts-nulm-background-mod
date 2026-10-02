@@ -20,6 +20,8 @@ typedef struct NulmGraphic {
     int fill_type;
     int vertex_count;
     float *vertices; /* x, y, u, v per vertex */
+    float u_min, v_min, u_max, v_max; /* bounds of the texture coordinates */
+    int uv_in_range;                  /* all coordinates lie inside 0..1 (not a repeating texture) */
     int index_count;
     unsigned short *indices;
 } NulmGraphic;
